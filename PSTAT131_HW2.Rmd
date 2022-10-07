@@ -25,11 +25,13 @@ abalone_data <- read_csv(file = "data/abalone.csv")
 
 age <- abalone_data[9] + 1.5
 
+colnames(age) <- "age"
+
 abalone_data_age <- cbind(age, abalone_data)
 
-colnames(abalone_data_age)[1] <- "age"
+hist(abalone_data_age$age, xlab = "Abalone Age", main = "")
 
-hist(abalone_data_age$age)
+abalone_data_age
 
 ```
 Based off the histogram, we can see that abalone between the ages of 10 and 12 are most prevalent in this dataset. Abalone between the age of 12 and 14, as well as 8 and 10 are also observed frequently. Abalone older than 14 and younger than 8 are observed rarely.
@@ -53,8 +55,13 @@ Code from Lab 2
 ```{r}
 
 # Dummy coding categorical predictors, creating interactions
-abalone_steps <- recipe(age ~ ., data = abalone_train) %>% step_dummy(all_nominal_predictors()) %>% step_scale(all_numeric_predictors()) %>% step_center(all_numeric_predictors()) %>% step_interact(terms = ~ type:shucked_weight + longest_shell:diameter + shucked_weight:shell_weight)
 
+abalone_steps <- recipe(age ~ ., data = abalone_train) %>% step_rm(rings) %>% step_dummy(all_nominal_predictors()) %>% step_interact(terms = ~ type:shucked_weight + longest_shell:diameter + shucked_weight:shell_weight) %>% step_scale(all_numeric_predictors()) %>%  step_center(all_numeric_predictors())
+
+#%>% step_interact(terms = ~ type:shucked_weight + longest_shell:diameter + shucked_weight:shell_weight)
+
+
+#REMOVED TYPE:SHUCKED_WEIGHT BC IT WOULDNT WORK
 ```
 
 
@@ -69,35 +76,23 @@ lm_abalone_model <- linear_reg() %>% set_engine("lm")
 
 ```
 
+
+#### Question 5
+code from Lab 2
 ```{r}
 lm_workflow <- workflow() %>% add_model(lm_abalone_model) %>% add_recipe(abalone_steps)
 
 lm_abalone_fit <- fit(lm_workflow, abalone_train)
 
-#lm_abalone_fit %>% extract_fit_parsnip() %>% tidy()
-
 ```
 
-Question 6:
+#### Question 6:
 
 ```{r}
 
-lm_abalone_model
-
 lm_abalone_model <- linear_reg() %>% set_engine("lm") %>% fit(age ~ ., data = abalone_data_age)
 
-#abalone_train_res <- predict(lm_abalone_fit, new_data = abalone_train %>% select(-age))
-
-#head(abalone_train_res)
-
-predict_input <- data.frame(longest_shell = 0.50, diameter = 0.10, height = 0.30, whole_weight = 4, shucked_weight = 1, viscera_weight = 2, shell_weight = 1)
-
-
-#i <- c(1:7)
-
-#predict_input[ , i] <- apply(predict_input[ , i], 7, function(x) as.numeric(as.character(x)))
-
-#is.numeric(predict_input)
+predict_input <- data.frame(type = F, longest_shell = 0.50, diameter = 0.10, height = 0.30, whole_weight = 4, shucked_weight = 1, viscera_weight = 2, shell_weight = 1)
 
 predict(lm_abalone_fit, new_data = predict_input %>% select(-age))
 
@@ -106,6 +101,6 @@ predict(lm_abalone_fit, new_data = predict_input %>% select(-age))
 
 
 QUESTIONS:
-DID I USE STEP_INTERACT PROPERLY? EVERY TIME I ADD IT "lm_abalone_fit <- fit(lm_workflow, abalone_train)" STOPS WORKING. NUMBER 3
+WHY DOESNT QUESTION 3 WORK WHEN I ADD TYPE VAIRABLE AS INTERACTION VARIABLE?
 
 QUESTION 6 PREDICT WONT WORK
