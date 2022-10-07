@@ -1,106 +1,129 @@
+
+
 ---
 title: "R Notebook"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
 
-```{r}
+```{r, results = F, echo = F}
 
 library(ggplot2)
 library(tidyverse)
 library(tidymodels)
 library(corrplot)
+library(yardstick)
 set.seed(041301)
 
 ```
 
+<br>
 
 #### Question 1
+code from Lab 2
 ```{r}
 
-setwd("~/Downloads/homework-2 4")
-
+# Changing my working directory (for some reason, read_csv won't work without this step)
+setwd("~/Downloads/homework-2")
 abalone_data <- read_csv(file = "data/abalone.csv")
 
+# Creating "age" variable and binding it to abalone_data data frame
 age <- abalone_data[9] + 1.5
-
-colnames(age) <- "age"
 
 abalone_data_age <- cbind(age, abalone_data)
 
+colnames(abalone_data_age)[1] <- "age"
+
+# Creating a histogram to assess distribution of "age" variable
 hist(abalone_data_age$age, xlab = "Abalone Age", main = "")
 
-abalone_data_age
-
 ```
+
+
 Based off the histogram, we can see that abalone between the ages of 10 and 12 are most prevalent in this dataset. Abalone between the age of 12 and 14, as well as 8 and 10 are also observed frequently. Abalone older than 14 and younger than 8 are observed rarely.
 
+<br>
 
 #### Question 2
-Code from Lab 2
+code from Lab 2
 ```{r}
 
-#Splitting abalone data into a training set and a testing set
-abalone_split <- initial_split(abalone_data_age, prop = 0.80, strata = age)
+# Splitting the abalone data, with 80% of the data going to the training set, and 20% of the data going to the test set
+abalone_split <- abalone_data_age %>% initial_split(strata = age, prop = 0.80)
 
-abalone_train <- training(abalone_split)
+abalone_train <- testing(abalone_split)
 abalone_test <- testing(abalone_split)
 
 ```
 
+<br>
 
 #### Question 3
-Code from Lab 2
+code from Lab 2
 ```{r}
 
-# Dummy coding categorical predictors, creating interactions
+# Dummy coding categorical predictors, creating interactions between variables, scaling all predictors, and centering all predictors in one line
+abalone_steps <- recipe(age ~ ., data = abalone_train) %>% step_rm(rings) %>% step_dummy(all_nominal_predictors()) %>% step_interact(terms = ~ starts_with("type"):shucked_weight + longest_shell:diameter + shucked_weight:shell_weight) %>% step_scale(all_numeric_predictors()) %>% step_center(all_numeric_predictors())
 
-abalone_steps <- recipe(age ~ ., data = abalone_train) %>% step_rm(rings) %>% step_dummy(all_nominal_predictors()) %>% step_interact(terms = ~ type:shucked_weight + longest_shell:diameter + shucked_weight:shell_weight) %>% step_scale(all_numeric_predictors()) %>%  step_center(all_numeric_predictors())
-
-#%>% step_interact(terms = ~ type:shucked_weight + longest_shell:diameter + shucked_weight:shell_weight)
-
-
-#REMOVED TYPE:SHUCKED_WEIGHT BC IT WOULDNT WORK
 ```
 
-
-
-DID I USE STEP_INTERACT PROPERLY? EVERY TIME I ADD IT "lm_abalone_fit <- fit(lm_workflow, abalone_train)" STOPS WORKING
+<br>
 
 #### Question 4
-Code from Lab 2
+code from lab 2
 ```{r}
 
+# Creating lm object, storing in lm_abalone_model
 lm_abalone_model <- linear_reg() %>% set_engine("lm")
 
 ```
 
+<br>
 
 #### Question 5
 code from Lab 2
 ```{r}
-lm_workflow <- workflow() %>% add_model(lm_abalone_model) %>% add_recipe(abalone_steps)
 
-lm_abalone_fit <- fit(lm_workflow, abalone_train)
+# Setting up empty workflow, adding lm_abalone_model, and adding abalone_steps
+abalone_workflow <- workflow() %>% add_recipe(abalone_steps) %>% add_model(lm_abalone_model)
 
 ```
 
-#### Question 6:
+<br>
 
+#### Question 6
+code from Lab 2
 ```{r}
 
-lm_abalone_model <- linear_reg() %>% set_engine("lm") %>% fit(age ~ ., data = abalone_data_age)
+# Fitting linear model to abalone training data set
+abalone_fit <- fit(abalone_workflow, abalone_train)
 
-predict_input <- data.frame(type = F, longest_shell = 0.50, diameter = 0.10, height = 0.30, whole_weight = 4, shucked_weight = 1, viscera_weight = 2, shell_weight = 1)
+# Creating data frame to hold inputs we want to use for our prediction
+predict_input <- data.frame(type = "F", longest_shell = 0.50, diameter = 0.10, height = 0.30, whole_weight = 4, shucked_weight = 1, viscera_weight = 2, shell_weight = 1, rings = 0)
 
-predict(lm_abalone_fit, new_data = predict_input %>% select(-age))
+# Predicting age of hypothetical abalone with inputs from predict_input
+predict(abalone_fit, new_data = predict_input)
 
 ```
 
+<br>
 
+#### Question 7
+code from Lab 2
+```{r}
 
-QUESTIONS:
-WHY DOESNT QUESTION 3 WORK WHEN I ADD TYPE VAIRABLE AS INTERACTION VARIABLE?
+# Creating data set of predicted values of age versus actual values of age
+abalone_train_results <- predict(abalone_fit, abalone_train) %>% bind_cols(abalone_train %>% dplyr::select(age))
+head(abalone_train_results)
 
-QUESTION 6 PREDICT WONT WORK
+# Creating a metric set that includes R squared, RMSE, and MAE
+abalone_metrics <- metric_set(rmse, rsq, mae)
+
+# Generating R squared, RMSE, and MAE values of the model
+abalone_metrics(abalone_train_results, truth = age, estimate = .pred)
+
+```
+
+The RMSE value was 2.0734525, the R squared value was 0.5800694, and the MAE value was 1.5068976. The R squared value tells us that approximately 58% of the variability that is observed in the "age" variable can be explained by our model.
