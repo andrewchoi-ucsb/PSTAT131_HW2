@@ -22,6 +22,7 @@ set.seed(041301)
 <br>
 
 #### Question 1
+<br>
 code from Lab 2
 ```{r}
 
@@ -47,6 +48,7 @@ Based off the histogram, we can see that abalone between the ages of 10 and 12 a
 <br>
 
 #### Question 2
+<br>
 code from Lab 2
 ```{r}
 
@@ -61,6 +63,7 @@ abalone_test <- testing(abalone_split)
 <br>
 
 #### Question 3
+<br>
 code from Lab 2
 ```{r}
 
@@ -72,6 +75,7 @@ abalone_steps <- recipe(age ~ ., data = abalone_train) %>% step_rm(rings) %>% st
 <br>
 
 #### Question 4
+<br>
 code from lab 2
 ```{r}
 
@@ -83,6 +87,7 @@ lm_abalone_model <- linear_reg() %>% set_engine("lm")
 <br>
 
 #### Question 5
+<br>
 code from Lab 2
 ```{r}
 
@@ -94,6 +99,7 @@ abalone_workflow <- workflow() %>% add_recipe(abalone_steps) %>% add_model(lm_ab
 <br>
 
 #### Question 6
+<br>
 code from Lab 2
 ```{r}
 
@@ -111,6 +117,7 @@ predict(abalone_fit, new_data = predict_input)
 <br>
 
 #### Question 7
+<br>
 code from Lab 2
 ```{r}
 
