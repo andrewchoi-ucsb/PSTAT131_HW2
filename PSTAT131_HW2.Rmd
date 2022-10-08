@@ -1,11 +1,12 @@
-
-
 ---
 title: "R Notebook"
 output:
   pdf_document: default
   html_document:
     df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r, results = F, echo = F}
@@ -21,9 +22,12 @@ set.seed(041301)
 
 <br>
 
-#### Question 1
-<br>
+#### Question 1:
+
+&nbsp;
+
 code from Lab 2
+
 ```{r}
 
 # Changing my working directory (for some reason, read_csv won't work without this step)
@@ -42,14 +46,19 @@ hist(abalone_data_age$age, xlab = "Abalone Age", main = "")
 
 ```
 
-
-Based off the histogram, we can see that abalone between the ages of 10 and 12 are most prevalent in this dataset. Abalone between the age of 12 and 14, as well as 8 and 10 are also observed frequently. Abalone older than 14 and younger than 8 are observed rarely.
+Based off the histogram, we can see that abalone between the ages of 10
+and 12 are most prevalent in this dataset. Abalone between the age of 12
+and 14, as well as 8 and 10 are also observed frequently. Abalone older
+than 14 and younger than 8 are observed rarely.
 
 <br>
 
-#### Question 2
-<br>
+#### Question 2:
+
+&nbsp;
+
 code from Lab 2
+
 ```{r}
 
 # Splitting the abalone data, with 80% of the data going to the training set, and 20% of the data going to the test set
@@ -62,9 +71,12 @@ abalone_test <- testing(abalone_split)
 
 <br>
 
-#### Question 3
-<br>
+#### Question 3:
+
+&nbsp;
+
 code from Lab 2
+
 ```{r}
 
 # Dummy coding categorical predictors, creating interactions between variables, scaling all predictors, and centering all predictors in one line
@@ -74,9 +86,12 @@ abalone_steps <- recipe(age ~ ., data = abalone_train) %>% step_rm(rings) %>% st
 
 <br>
 
-#### Question 4
-<br>
+#### Question 4:
+
+&nbsp;
+
 code from lab 2
+
 ```{r}
 
 # Creating lm object, storing in lm_abalone_model
@@ -86,9 +101,12 @@ lm_abalone_model <- linear_reg() %>% set_engine("lm")
 
 <br>
 
-#### Question 5
-<br>
+#### Question 5:
+
+&nbsp;
+
 code from Lab 2
+
 ```{r}
 
 # Setting up empty workflow, adding lm_abalone_model, and adding abalone_steps
@@ -98,9 +116,12 @@ abalone_workflow <- workflow() %>% add_recipe(abalone_steps) %>% add_model(lm_ab
 
 <br>
 
-#### Question 6
-<br>
+#### Question 6:
+
+&nbsp; 
+
 code from Lab 2
+
 ```{r}
 
 # Fitting linear model to abalone training data set
@@ -116,9 +137,12 @@ predict(abalone_fit, new_data = predict_input)
 
 <br>
 
-#### Question 7
-<br>
+#### Question 7:
+
+&nbsp; 
+
 code from Lab 2
+
 ```{r}
 
 # Creating data set of predicted values of age versus actual values of age
@@ -133,4 +157,7 @@ abalone_metrics(abalone_train_results, truth = age, estimate = .pred)
 
 ```
 
-The RMSE value was 2.0734525, the R squared value was 0.5800694, and the MAE value was 1.5068976. The R squared value tells us that approximately 58% of the variability that is observed in the "age" variable can be explained by our model.
+The RMSE value was 2.0734525, the R squared value was 0.5800694, and the
+MAE value was 1.5068976. The R squared value tells us that approximately
+58% of the variability that is observed in the "age" variable can be
+explained by our model.
