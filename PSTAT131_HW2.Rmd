@@ -44,6 +44,8 @@ colnames(abalone_data_age)[1] <- "age"
 # Creating a histogram to assess distribution of "age" variable
 hist(abalone_data_age$age, xlab = "Abalone Age", main = "")
 
+
+abalone_data_age
 ```
 
 Based off the histogram, we can see that abalone between the ages of 10
